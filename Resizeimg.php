@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace PHPResizeImg;
 
 	class ResizeImg {
-		private $filePath;
+		private static $filePath;
 		private $porcentaje;
 		private static $imgWidthOrigin;
 		private static $imgHeightOrigin;
@@ -35,16 +35,17 @@ namespace PHPResizeImg;
 		private $newPath;
 
 
+
 		public function assignName($name){
 			$this->imgsetName = $name;
 		}
 
 		public function __construct($filePath, $dimensiones = NULL){
 			// Ruta del archivo
-			$this->filePath = $filePath;
+			self::$filePath = $filePath;
 
 			// Obtenemos las dimensiones originales del archivo
-			$imgInfo = getimagesize($this->filePath);
+			$imgInfo = getimagesize(self::$filePath);
 			self::$imgWidthOrigin = $imgInfo[0];
 			self::$imgHeightOrigin = $imgInfo[1];
 
@@ -81,20 +82,32 @@ namespace PHPResizeImg;
 
 		}
 
+
+		/*
+			This static function simplify the process of call various method. That depends of the programmer
+		*/
+		public static function _resizeImg(	$path,$imgsetName, 
+											$dimensiones, $folder){
+
+		} 
+
+
+		// Set a default values of img name and new path/directory name
 		protected function dataDefault(){
 			if (!isset($this->imgsetName))
-				$this->imgsetName = "defaultImg".sha1(date("Y-m-d H:i:s"));
+				$this->imgsetName = "_thumb_".sha1(date("Y-m-d H:i:s"));
 
 
 			if (!isset($this->newPath))
 				$this->newPath = "img/upload";				
 		}
 
+
 		public function setPathImg($path){
 			$this->newPath = $path;
 		}
 
-		// Verifica permisos 
+		// View Permit of path
 		protected function viewPathPermit(){
 			if (!file_exists($this->newPath)){
 				mkdir($this->newPath);
@@ -105,14 +118,14 @@ namespace PHPResizeImg;
 		} 
 
 
-		// Crea la imagen segun el tipo mime
+		// Making a mime image type
 		private function imgCreateByFormat($canvas){
 			$imgPathName = $this->newPath."/".$this->imgsetName;
 
 			$this->viewPathPermit();
 			switch ($this->mimeType) {
 				case 'image/jpeg':
-					$origen = imagecreatefromjpeg($this->filePath);
+					$origen = imagecreatefromjpeg(self::$filePath);
 					imagecopyresampled($canvas, $origen, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
 										self::$imgHeightDefault,
@@ -120,12 +133,13 @@ namespace PHPResizeImg;
 										self::$imgHeightOrigin);
 					
 					$pathName = $imgPathName.".jpg";
+					imagejpeg($canvas);
 					imagejpeg($canvas,$pathName);
 					
 					break;
 
 				case 'image/png':
-					$origen = imagecreatefrompng($this->filePath);
+					$origen = imagecreatefrompng(self::$filePath);
 					imagecopyresampled($canvas, $origen, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
 										self::$imgHeightDefault,
@@ -135,7 +149,7 @@ namespace PHPResizeImg;
 					break;
 
 				case 'image/gif':
-					$origen = imagecreatefromgif($this->filePath);
+					$origen = imagecreatefromgif(self::$filePath);
 					imagecopyresampled($canvas, $origen, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
 										self::$imgHeightDefault,
