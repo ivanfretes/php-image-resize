@@ -37,6 +37,7 @@ namespace PHPResizeImg;
 
 
 		public function assignName($name){
+			$name = str_replace(' ', '_', $name);
 			$this->imgsetName = $name;
 		}
 
@@ -78,7 +79,7 @@ namespace PHPResizeImg;
 													self::$imgHeightDefault);
 			}
 
-			//header("Content-type:".$this->mimeType);
+			header("Content-type:".$this->mimeType);
 			$this->imgCreateByFormat($canvasSize);
 
 		}
@@ -109,6 +110,7 @@ namespace PHPResizeImg;
 
 
 		public function setPathImg($path){
+			$path = str_replace(' ', '', $path);
 			$this->newPath = $path;
 		}
 
@@ -131,7 +133,7 @@ namespace PHPResizeImg;
 
 		// Making a MIME type image
 		protected function imgCreateByFormat($canvas){
-			$imgPathName = $this->newPath."/".$this->imgsetName;
+			$imgFileName = $this->newPath."/".$this->imgsetName;
 
 			$this->viewPathPermit();
 			switch ($this->mimeType) {
@@ -143,9 +145,7 @@ namespace PHPResizeImg;
 										self::$imgWidthOrigin,
 										self::$imgHeightOrigin);
 					
-					$pathName = $imgPathName.".jpg";
-					imagejpeg($canvas,$pathName);
-					
+					imagejpeg($canvas,$imgFileName.".jpg");
 					break;
 
 				case 'image/png':
@@ -155,7 +155,7 @@ namespace PHPResizeImg;
 										self::$imgHeightDefault,
 										self::$imgWidthOrigin,
 										self::$imgHeightOrigin);
-					imagepng($canvas,$imgPathName.".png");
+					imagepng($canvas,$imgFileName.".png");
 					break;
 
 				case 'image/gif':
@@ -165,7 +165,7 @@ namespace PHPResizeImg;
 										self::$imgHeightDefault,
 										self::$imgWidthOrigin,
 										self::$imgHeightOrigin);
-					imagegif($canvas,$imgPathName.".gif");
+					imagegif($canvas,$imgFileName.".gif");
 					break;
 
 				default:
