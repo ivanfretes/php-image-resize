@@ -82,7 +82,6 @@ namespace PHPResizeImg;
 			}
 
 			header("Content-type:".$this->mimeType);
-			imagesavealpha($canvasSize, true);
 			$this->imgCreateByFormat($canvasSize);
 
 		}
@@ -152,11 +151,13 @@ namespace PHPResizeImg;
 					break;
 
 				case 'image/png':
-					// Set Trasparency
+					// Set transparency of a png image
+					
+					imagesavealpha($canvas, true);
 					$color = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
 					imagefill($canvas, 0, 0, $color);
 					
-					
+
 					$img = imagecreatefrompng(self::$filePath);
 					imagecopyresampled($canvas, $img, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
