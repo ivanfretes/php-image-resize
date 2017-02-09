@@ -46,6 +46,7 @@ namespace PHPResizeImg;
 
 			// Obtenemos las dimensiones originales del archivo
 			$imgInfo = getimagesize(self::$filePath);
+
 			self::$imgWidthOrigin = $imgInfo[0];
 			self::$imgHeightOrigin = $imgInfo[1];
 
@@ -53,14 +54,14 @@ namespace PHPResizeImg;
 			$this->mimeType = $imgInfo["mime"]; 
 
 			// Cargamos los datos por defecto
-			$this->dataDefault();
-
-
+			
 			if (gettype($dimensiones) == "array")
 				$this->resizeImgByPixeles($dimensiones);
 			else 
 				$this->resizeImgByPorcentaje($dimensiones);
 			
+			// Definimos el nombre por defecto
+			$this->dataDefault();
 		}
 
 		public function getmimeType(){
@@ -92,12 +93,16 @@ namespace PHPResizeImg;
 		} 
 
 
+
+
 		// Set a default values of img name and new path/directory name
 		protected function dataDefault(){
-			if (!isset($this->imgsetName))
-				$this->imgsetName = "_thumb_".sha1(date("Y-m-d H:i:s"));
-
-
+			if (!isset($this->imgsetName)){
+				$this->imgsetName = basename(self::$filePath)."_thumb_";
+				$this->imgsetName .= self::$imgWidthDefault."x";
+				$this->imgsetName .= self::$imgHeightDefault."_";
+				$this->imgsetName .= sha1(date("Y-m-d H:i:s"));
+			}
 			if (!isset($this->newPath))
 				$this->newPath = "img/upload";				
 		}
@@ -105,6 +110,12 @@ namespace PHPResizeImg;
 
 		public function setPathImg($path){
 			$this->newPath = $path;
+		}
+
+
+		// Puede acontecer una excepcion
+		public function getPathImg(){
+			return $this->newPath;	
 		}
 
 		// View Permit of path
@@ -118,8 +129,8 @@ namespace PHPResizeImg;
 		} 
 
 
-		// Making a mime image type
-		private function imgCreateByFormat($canvas){
+		// Making a MIME type image
+		protected function imgCreateByFormat($canvas){
 			$imgPathName = $this->newPath."/".$this->imgsetName;
 
 			$this->viewPathPermit();
@@ -133,7 +144,6 @@ namespace PHPResizeImg;
 										self::$imgHeightOrigin);
 					
 					$pathName = $imgPathName.".jpg";
-					imagejpeg($canvas);
 					imagejpeg($canvas,$pathName);
 					
 					break;
@@ -164,7 +174,7 @@ namespace PHPResizeImg;
 			
 		}
 
-		// Contiene las nuevas dimensiones, de la imagen 
+		// New dimensions by width and height pixels
 		public function resizeImgByPixeles($dimensiones){
 
 			list(self::$imgWidthDefault, 
@@ -172,7 +182,7 @@ namespace PHPResizeImg;
 		}
 
 		
-
+		// New dimensions by percentage
 		public function resizeImgByPorcentaje($porcentaje){
 
 			self::$imgWidthDefault = self::$imgWidthOrigin * $porcentaje;
