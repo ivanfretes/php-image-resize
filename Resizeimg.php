@@ -69,6 +69,8 @@ namespace PHPResizeImg;
 			return $this->mimeType;
 		}
 
+
+		// Re define the new size for image 
 		public function resizeImg($dimensiones = NULL){
 			if ($dimensiones !== NULL){
 				$canvasSize = imagecreatetruecolor(	$dimensiones[0],
@@ -80,6 +82,7 @@ namespace PHPResizeImg;
 			}
 
 			header("Content-type:".$this->mimeType);
+			imagesavealpha($canvasSize, true);
 			$this->imgCreateByFormat($canvasSize);
 
 		}
@@ -110,7 +113,7 @@ namespace PHPResizeImg;
 
 
 		public function setPathImg($path){
-			$path = str_replace(' ', '', $path);
+			//$path = str_replace(' ', '', $path);
 			$this->newPath = $path;
 		}
 
@@ -138,8 +141,8 @@ namespace PHPResizeImg;
 			$this->viewPathPermit();
 			switch ($this->mimeType) {
 				case 'image/jpeg':
-					$origen = imagecreatefromjpeg(self::$filePath);
-					imagecopyresampled($canvas, $origen, 0, 0, 0, 0, 
+					$img = imagecreatefromjpeg(self::$filePath);
+					imagecopyresampled($canvas, $img, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
 										self::$imgHeightDefault,
 										self::$imgWidthOrigin,
@@ -149,18 +152,24 @@ namespace PHPResizeImg;
 					break;
 
 				case 'image/png':
-					$origen = imagecreatefrompng(self::$filePath);
-					imagecopyresampled($canvas, $origen, 0, 0, 0, 0, 
+					// Set Trasparency
+					$color = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+					imagefill($canvas, 0, 0, $color);
+					
+					
+					$img = imagecreatefrompng(self::$filePath);
+					imagecopyresampled($canvas, $img, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
 										self::$imgHeightDefault,
 										self::$imgWidthOrigin,
 										self::$imgHeightOrigin);
+					
 					imagepng($canvas,$imgFileName.".png");
 					break;
 
 				case 'image/gif':
-					$origen = imagecreatefromgif(self::$filePath);
-					imagecopyresampled($canvas, $origen, 0, 0, 0, 0, 
+					$img = imagecreatefromgif(self::$filePath);
+					imagecopyresampled($canvas, $img, 0, 0, 0, 0, 
 										self::$imgWidthDefault, 
 										self::$imgHeightDefault,
 										self::$imgWidthOrigin,
@@ -171,14 +180,15 @@ namespace PHPResizeImg;
 				default:
 					break;
 			}
-			
+
+			imagedestroy($img);
 		}
 
 		// New dimensions by width and height pixels
 		public function resizeImgByPixeles($dimensiones){
 
-			list(self::$imgWidthDefault, 
-				 self::$imgHeightDefault) = $dimensiones;
+			list( self::$imgWidthDefault, 
+				  self::$imgHeightDefault) = $dimensiones;
 		}
 
 		
