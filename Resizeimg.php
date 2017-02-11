@@ -41,6 +41,7 @@ namespace PHPResizeImg;
 			$this->imgsetName = $name;
 		}
 
+
 		public function __construct($filePath, $dimensiones = NULL){
 			// Ruta del archivo
 			self::$filePath = $filePath;
