@@ -66,6 +66,7 @@ namespace PHPResizeImg;
 		}
 
 		public function getmimeType(){
+			// Test Visual Studio Git Tools
 			return $this->mimeType;
 		}
 
