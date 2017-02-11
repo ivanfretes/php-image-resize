@@ -81,7 +81,6 @@ namespace PHPResizeImg;
 													self::$imgHeightDefault);
 			}
 
-			header("Content-type:".$this->mimeType);
 			$this->imgCreateByFormat($canvasSize);
 
 		}
@@ -135,6 +134,7 @@ namespace PHPResizeImg;
 
 		// Making a MIME type image
 		protected function imgCreateByFormat($canvas){
+			//header("Content-type:".$this->mimeType);
 			$imgFileName = $this->newPath."/".$this->imgsetName;
 
 			$this->viewPathPermit();
