@@ -1,3 +1,3 @@
 # php-resize-image
 
-Basic Image Resizer with gd2 and PHP
+Basic Image Resizer with GD
