@@ -1,6 +1,5 @@
 <?
 
-$PERCENT = 100;
 
 class ImageResize {
 
@@ -19,11 +18,11 @@ class ImageResize {
 	 * @var {mixed} ref: a new image generated 
 	 */
 	protected $format;
-	protected $newName;
-	protected $newPath;
+	protected $newName = 'image-resized';
+	protected $newPath = '../images/resized';
 	protected $newWidth;
 	protected $newHeight;
-
+	protected $newFilePath;
 
 	/**
 	 * Data assigned by default
@@ -40,6 +39,7 @@ class ImageResize {
 		'image/png' =>  'resizePNG'
 	);
 	protected $canvas;
+	protected $fileOpen;
 
 
 	/**
@@ -64,12 +64,29 @@ class ImageResize {
 	}
 
 
-	public function resize(){
-		$resize = $this->mimeTypeSupport[$this->mimeType];
+	/**
+	 * Update the file data
+	 */ 
+	protected function setFileData(){
+		$this->sizeOrigin = filesize($this->filePath);
+		$this->nameOrigin = basename($this->filePath);
+		$this->fileOpen = fopen($this->filePath, 'r');
+		$fileData = fread($this->fileOpen, $this->sizeOrigin);
+	}
 
-		header("Content-type:".$this->mimeType);
-		$this->canvas = imagecreatetruecolor($this->newWidth, $this->Height);
-		$this->$resize();
+
+	public function resize(){
+		$mime = $this->mimeType;
+		$resizeByFormat = $this->mimeTypeSupport[$mime];
+		$this->newFilePath = "$this->newPath/$this->newName";
+
+		header("Content-type:".$mime);
+		$this->canvas = imagecreatetruecolor(
+			$this->newWidth, $this->newHeight
+		);
+
+		$this->$resizeByFormat();
+		fclose($this->fileOpen); 
 	}
 
 
@@ -77,13 +94,13 @@ class ImageResize {
 	 * Updated the name of the image. 
 	 * (*) Default replacement dash instead white space key
 	 * 
-	 * @param {string} 
+	 * @param {string} $char
 	 */
-	/*public function removeWhiteSpace($name, $newChar = '-'){
+	public function removeWhiteSpace($char = '-'){
 		$this->newName = str_replace(
-			' ', $newCharacter, $this->newNameImage
+			' ', $char, $this->newName
 		);
-	}*/
+	}
 
 
 	/**
@@ -95,8 +112,9 @@ class ImageResize {
 			if (!is_file($filePath)) {
 				throw new Exception("Verify that the file exists");
 			}
-			$this->filePath = $filePath;
+		
 
+			$this->filePath = $filePath;
 		} catch (Exception $e) {
 			echo $e->getMessage();
 			exit;
@@ -110,6 +128,7 @@ class ImageResize {
 	 */
 	public function __construct($filePath){
 		$this->verifyPath($filePath);
+		$this->setFileData();
 		$this->setImageData();
 	}
 
@@ -119,13 +138,11 @@ class ImageResize {
 	 */
 	private function setImageData(){
 		try {
-			$imageData = exif_read_data($this->filePath);
-		
-			$this->mimeType = $imageData['MimeType'];
-			$this->nameOrigin = $imageData['FileName'];
-			$this->widthOrigin = $imageData['COMPUTED']['Width'];
-			$this->heightOrigin = $imageData['COMPUTED']['Height'];
-			$this->sizeOrigin = $imageData['FileSize'];
+			$imageData = getimagesize($this->filePath);
+
+			$this->mimeType = $imageData['mime'];
+			$this->widthOrigin = $imageData[0];
+			$this->heightOrigin = $imageData[1];
 			
 			if (!array_key_exists($this->mimeType, $this->mimeTypeSupport))
 				throw new Exception("The file is not an image");
@@ -149,31 +166,6 @@ class ImageResize {
 	}
 
 
-	/**
-	 * Verify that the data is not empty, null, space, false, 
-	 * @param {mixed} $val - Generic value
-	 */ 
-	// protected function isEmpty($val){
-	// 	return empty($val) || FALSE != $val || '' != trim($val); 
-	// }
-
-
-	/**
-	 * Throw an exception, if the data is empty or has some value 
-	 * of $this->isEmpty($val)
-	 * @param {mixed} $val
-	 */ 
-	// protected function isEmptyException(&$val){
-	// 	try {
-	// 		if ($this->isEmpty($val))	
-	// 			throw new Exception('La variable $val es requerida');
-				
-	// 	} catch (Exception $e) {
-	// 		echo $e->getMessage();
-	// 		exit;
-	// 	}
-	// }
-
 
 	/**
 	 * Setting the new Path of image,if not exits the path, created it
@@ -181,7 +173,7 @@ class ImageResize {
 	 * @param {string} $path
 	 */
 	public function setNewPath($path){
-		$this->newPath = $path;
+		$this->newPath = rtrim($path,'/','');
 	}
 
 	/**
@@ -206,14 +198,16 @@ class ImageResize {
 	 * Create a new JPG Image
 	 */ 
 	protected function resizeJPEG(){
+		echo "string";
 		$image = imagecreatefromjpeg($this->filePath);
 		imagecopyresampled(
 			$this->canvas, $image, 0, 0, 0, 0, 
+			$this->newWidth,
+			$this->newHeight,
 			$this->widthOrigin,
-			$this->$heightOrigin
+			$this->heightOrigin
 		);
-		
-		imagejpeg($this->canvas, $nameFile.".jpg");
+		imagejpeg($this->canvas, "$this->newFilePath.jpg");
 	}
 
 
@@ -223,18 +217,31 @@ class ImageResize {
 	protected function resizePNG(){
 		imagesavealpha($this->canvas, true);
 		$color = imagecolorallocatealpha(
-			$canvas, 0, 0, 0, 127
+			$this->canvas, 0, 0, 0, 127
 		);
 		imagefill($this->canvas, 0, 0, $color);
 		
 
-		$img = imagecreatefrompng($this->filePath);
+		$image = imagecreatefrompng($this->filePath);
 		imagecopyresampled(
-			$this->canvas, $img, 0, 0, 0, 0, 
-			$this->newWidth, $this->newHeight	
+			$this->canvas, $image, 0, 0, 0, 0, 
+			$this->newWidth, 
+			$this->newHeight,
+			$this->widthOrigin,
+			$this->heightOrigin	
 		);
 		
-		imagepng($canvas, $nameFile.".png");*/
+		imagepng($this->canvas, "$this->newFilePath.png");
+	}
+
+
+	public function setNewName($newName){
+		$this->newName = $newName;
+	}
+
+
+	public function getNewFilePath(){
+		$this->newFilePath();
 	}
 
 
@@ -246,10 +253,10 @@ class ImageResize {
 		imagecopyresampled(
 			$this->canvas, 
 			$image, 0, 0, 0, 0, 
-			$this->newWidth
+			$this->newWidth,
 			$this->newHeight
 		);
-		imagegif($canvas,$nameFile.".gif");
+		imagegif($canvas, "$this->newFilePath.gif");
 	}
 
 
