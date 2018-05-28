@@ -8,12 +8,12 @@ class PathMigrate {
 		'path_migration' => ''
 	);
 
-	protected static setConfiguration($configuration){
-		if (isset($configuration['path_migration'] )){
+	protected static function setConfiguration($configuration){
+		if (!array_key_exists('path_migration',$configuration)){
 			$configuration['path_migration'] = $configuration['path'];
 		}
 
-		$this->configuration = $configuration;
+		self::$configuration = $configuration;
 	}
 
 
@@ -22,24 +22,17 @@ class PathMigrate {
 	// mc-donalds -> Mc Donalds
 	public static function setFieldNameSQL($configuration = NULL)
 	{
-		$this->setConfiguration($configuration);
+		self::setConfiguration($configuration);
 
 		$dataTmp = [];
-		$dirStream = scandir($this->configuration['path']);
-		$arrTmp['dir_stream'] = $dirStream;
+		$dirStream = scandir(self::$configuration['path']);
 
 		foreach ($dirStream as $fileName) {
 			if ($fileName != '.' && $fileName != '..'){
 				$nameTmp = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileName);
 				$nameTmp = preg_replace('/(_|-)+/', ' ', $nameTmp);
 					
-				/**
-				 * Arreglo temporal que almacena, los valores del array
-				 * original como los del generado
-				 */ 
-
-				// Mover a otra funcion
-				if ($configuration['title_case'])
+				if (self::$configuration['title_case'])
 					$nameTmp = ucwords($nameTmp);
 
 				array_push($dataTmp, array(
@@ -57,19 +50,42 @@ class PathMigrate {
 	// Retorna los valores con el path a ser migrados en el sql
 	// /home/file/archivo-data.jpg
 	public static function setPathToSQL($configuration = NULL){
-		$this->setConfiguration($configuration);
+		self::setConfiguration($configuration);
 
 		$pathData = [];
-		$dirStream = scandir($path);
+		$dirStream = scandir(self::$configuration['path']);
 		foreach ($dirStream as $fileName) {
 			if ($fileName != '.' && $fileName != '..'){
 				$fileName = rtrim($fileName, '/');
-				$pathMigration = $this->configuration['path_migration'];
+				$pathMigration = self::$configuration['path_migration'];
 				array_push($pathData, $pathMigration.'/'.$fileName);
 			}
 		}
 
 		return $pathData;
+	}
+
+
+	/**
+	 * Por el momento, solo me interesa que inserte un dato por registro
+	 * 
+	 * @param string $prepare, "$db->prepare"
+	 * @param array $dataList, Conjunto de Datos a ser insertados
+	 */
+	public static function migrate($prepare, $dataList){
+		$i = 0;
+		$i_err = 0;
+		foreach ($dataList as $paramYield => $paramVal) {
+			$prepare->bindParam($paramYield, $paramVal);
+			
+			if (!$prepare->execute()){
+				echo "Problem to run the query!";
+				$i_err++;
+			}
+			$i++;
+		}
+
+		echo "Number of errors in the records migrated - ($i_error of $i)";
 	}
 }
 
