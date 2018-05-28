@@ -241,7 +241,7 @@ class ImageResize {
 
 
 	public function getNewFilePath(){
-		$this->newFilePath();
+		return $this->newFilePath;
 	}
 
 
