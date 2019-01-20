@@ -1,2 +1,4 @@
+./test
 ./test/util/database
-
+./test/*
+composer.json

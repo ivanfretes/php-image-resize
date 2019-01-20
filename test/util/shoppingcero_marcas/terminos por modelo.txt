@@ -1,0 +1,24 @@
+Para las portadas
+	*portada (del modelo en general)
+	*exterior_portada
+	*interior_portada
+
+Para los interiores
+	*interior1
+	*interior2
+	*interior3
+	*interior4
+
+Para los interiores
+	*exterior1
+	*exterior2
+	*exterior3
+	*exterior4
+
+Para el icono
+	*icono
+
+para los colores 
+	*color1
+	*color2
+	*color3

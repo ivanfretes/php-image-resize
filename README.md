@@ -1,17 +1,20 @@
-## php-resize-image ##
+## php-resize-migrate
 
-Basic Image Resizer with GD
+Redimensionador de Imagenes con GD y migrar los PATH a SQL
 
-### Implements ###
-**./test has some examples of implement**
 
-* As parameter is a array with the configuration of the migration, what happens the 
+### Opciones de redimensión de la imagen
 
-```
-	$configuration = array(
-		'title_case' => FALSE, 
-		'path' => 'path-a/path-b/file-name.txt',
-		'path_migration' => 'path-c/file-name-txt' # That is the new file path
-	);
+    - $image->setDimensions($newWidth, $newHeight); - nuevo ancho y nuevo algo
+    - $image->setWithHeight($newHeight); - ratio por el alto
+    - $image->setWithWidth($newWidth);
+    - setWithPercent($percent)
+    
 
-```
+### Opciones referente al nombre de la imagen
+
+    1. Si no se asigna nombre, guarda por defecto como image-resize.[x]
+    2. $image->setNewFileName($newName); - Nuevo nombre de la imagen, no especificar formato
+	3. $image->setNewPath($newPath); - Nuevo destino de la imagen
+    4. $image->notRenameFile(); conservar el nombre original
+ 
