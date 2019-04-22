@@ -1,6 +1,6 @@
 ## php-resize-migrate
 
-Redimensionador de Imagenes con GD y migrar los PATH a SQL
+Redimensionador de Imagenes con GD
 
 
 ### Opciones de redimensión de la imagen
@@ -18,3 +18,5 @@ Redimensionador de Imagenes con GD y migrar los PATH a SQL
 	3. $image->setNewPath($newPath); - Nuevo destino de la imagen
     4. $image->notRenameFile(); conservar el nombre original
  
+### Migrar Path redimencionado a SQL
+	
